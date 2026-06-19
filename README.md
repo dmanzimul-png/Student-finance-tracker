@@ -1,6 +1,6 @@
 # Student Finance Tracker
 
-**Live demo:** https://dmanzimul-png.github.io/student-finance-tracker/
+**Live demo:** https://dmanzimul-png.github.io/Student-finance-tracker/
 
 Theme: **Student Finance Tracker**
 
