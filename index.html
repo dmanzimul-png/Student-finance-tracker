@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Finance Tracker</title>
+  <link rel="stylesheet" href="styles/styles.css">
+  <link rel="stylesheet" href="styles/responsive.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header role="banner">
+    <h1>💰 Student Finance Tracker</h1>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Open navigation menu">
+      <span class="burger-bar"></span>
+      <span class="burger-bar"></span>
+      <span class="burger-bar"></span>
+    </button>
+  </header>
+
+  <nav id="nav-menu" aria-label="Main navigation">
+    <ul role="list">
+      <li><a href="#about">About</a></li>
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#transactions">Transactions</a></li>
+      <li><a href="#add-transaction">Add</a></li>
+      <li><a href="#settings">Settings</a></li>
+    </ul>
+  </nav>
+
+  <main id="main-content">
+
+    <!-- About -->
+    <section id="about" aria-labelledby="about-heading" tabindex="-1">
+      <h2 id="about-heading">About</h2>
+      <p>Track your student expenses, set a monthly budget cap, search and sort transactions, and export your data — all stored locally in your browser.</p>
+      <ul class="about-list">
+        <li><strong>Created by:</strong> Manzi Divin Elvis</li>
+        <li><strong>Email:</strong> <a href="mailto:d.manzimul@alustudent.com">d.manzimul@alustudent.com</a></li>
+        <li><strong>GitHub:</strong> <a href="https://github.com/dmanzimul-png" target="_blank" rel="noopener noreferrer">github.com/dmanzimul-png</a></li>
+      </ul>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" aria-labelledby="dashboard-heading" tabindex="-1">
+      <h2 id="dashboard-heading">Dashboard</h2>
+
+      <div class="stats-container" role="list" aria-label="Summary statistics">
+        <div class="card" role="listitem">
+          <h3>Total Transactions</h3>
+          <p id="total-transactions" class="stat-number" aria-live="polite">0</p>
+        </div>
+        <div class="card" role="listitem">
+          <h3>Total Spending</h3>
+          <p id="total-spending" class="stat-number" aria-live="polite">$0.00</p>
+        </div>
+        <div class="card" role="listitem">
+          <h3>Top Category</h3>
+          <p id="top-category" class="stat-number" aria-live="polite">—</p>
+        </div>
+      </div>
+
+      <div id="cap-status" role="status" aria-live="polite" class="cap-none">No budget cap set.</div>
+
+      <div id="chart" aria-labelledby="chart-heading">
+        <h3 id="chart-heading">Last 7 Days Trend</h3>
+        <div id="chart-bars" class="chart-bars" role="img" aria-label="Bar chart of spending over the last 7 days"></div>
+      </div>
+    </section>
+
+    <!-- Transactions -->
+    <section id="transactions" aria-labelledby="transactions-heading" tabindex="-1">
+      <h2 id="transactions-heading">Transactions</h2>
+
+      <div class="search-bar" role="search">
+        <label for="search">Search (regex)</label>
+        <input type="search" id="search"
+               placeholder="e.g. coffee|(tea) or \.\d{2}\b"
+               aria-describedby="search-status"
+               autocomplete="off">
+        <label class="toggle-label">
+          <input type="checkbox" id="case-toggle"> Case-sensitive
+        </label>
+        <span id="search-status" aria-live="polite" class="search-status"></span>
+        <span id="result-count" aria-live="polite" class="result-count"></span>
+      </div>
+
+      <div class="table-wrapper" role="region" aria-label="Transactions table" tabindex="0">
+        <table>
+          <caption class="sr-only">List of your financial transactions. Click column headers to sort.</caption>
+          <thead>
+            <tr>
+              <th scope="col" data-sort-col aria-sort="none">
+                <button data-sort="description" class="sort-btn">Description <span aria-hidden="true">↕</span></button>
+              </th>
+              <th scope="col" data-sort-col aria-sort="none">
+                <button data-sort="amount" class="sort-btn">Amount <span aria-hidden="true">↕</span></button>
+              </th>
+              <th scope="col">Category</th>
+              <th scope="col" data-sort-col aria-sort="descending">
+                <button data-sort="date" class="sort-btn">Date <span aria-hidden="true">↕</span></button>
+              </th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="transaction-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Add Transaction -->
+    <section id="add-transaction" aria-labelledby="add-heading" tabindex="-1">
+      <h2 id="add-heading">Add Transaction</h2>
+
+      <form id="transaction-form" novalidate aria-label="Add new transaction">
+
+        <div class="form-group">
+          <label for="description">Description <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="description" autocomplete="off"
+                 aria-describedby="description-error"
+                 aria-required="true" placeholder="e.g. Lunch at cafeteria">
+          <small id="description-error" role="alert" aria-live="assertive"></small>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Amount <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="amount" inputmode="decimal"
+                 aria-describedby="amount-error amount-hint"
+                 aria-required="true" placeholder="e.g. 12.50">
+          <small id="amount-hint" class="field-hint">Positive number, up to 2 decimal places.</small>
+          <small id="amount-error" role="alert" aria-live="assertive"></small>
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category <span class="req" aria-hidden="true">*</span></label>
+          <select id="category" aria-describedby="category-error" aria-required="true">
+            <option value="Food">Food</option>
+            <option value="Books">Books</option>
+            <option value="Transport">Transport</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Fees">Fees</option>
+            <option value="Other">Other</option>
+          </select>
+          <small id="category-error" role="alert" aria-live="assertive"></small>
+        </div>
+
+        <div class="form-group">
+          <label for="date">Date <span class="req" aria-hidden="true">*</span></label>
+          <input type="date" id="date"
+                 aria-describedby="date-error"
+                 aria-required="true">
+          <small id="date-error" role="alert" aria-live="assertive"></small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Add Transaction</button>
+          <button type="reset" class="btn-secondary" id="reset-form">Clear</button>
+        </div>
+
+      </form>
+
+      <div id="status-message" role="status" aria-live="polite" class="status-msg" style="display:none"></div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settings" aria-labelledby="settings-heading" tabindex="-1">
+      <h2 id="settings-heading">Settings</h2>
+
+      <fieldset class="settings-fieldset">
+        <legend>Budget &amp; Currency</legend>
+        <div class="settings-grid">
+          <div class="form-group">
+            <label for="budget-cap">Monthly Budget Cap</label>
+            <input type="number" id="budget-cap" min="0" step="0.01"
+                   aria-describedby="budget-cap-hint">
+            <small id="budget-cap-hint" class="field-hint">Set to 0 to disable.</small>
+          </div>
+          <div class="form-group">
+            <label for="currency-select">Display Currency</label>
+            <select id="currency-select">
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="rate-eur">USD → EUR rate</label>
+            <input type="number" id="rate-eur" min="0.0001" step="0.0001">
+          </div>
+          <div class="form-group">
+            <label for="rate-gbp">USD → GBP rate</label>
+            <input type="number" id="rate-gbp" min="0.0001" step="0.0001">
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="settings-actions">
+        <button id="save-settings" class="btn-primary">💾 Save Settings</button>
+        <div class="settings-data-btns">
+          <button id="export-btn" class="btn-secondary">⬇ Export JSON</button>
+          <label class="btn-secondary import-label" tabindex="0" role="button"
+                 aria-label="Import JSON file">
+            ⬆ Import JSON
+            <input type="file" id="import-input" accept=".json" style="display:none"
+                   aria-hidden="true" tabindex="-1">
+          </label>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer role="contentinfo">
+    <p>Student Finance Tracker &copy; 2026 &mdash; All data stored locally in your browser.</p>
+  </footer>
+
+  <script type="module" src="scripts/app.js"></script>
+</body>
+</html>

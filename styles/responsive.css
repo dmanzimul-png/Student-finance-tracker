@@ -1,0 +1,163 @@
+/* ───────────────────────────────────────────────────────────────
+   responsive.css  —  mobile-first
+   Base lives in styles.css
+   Breakpoints: 360 · 480 · 600 · 768 · 1024 · 1280
+─────────────────────────────────────────────────────────────── */
+
+/* ── 360px ───────────────────────────────────────────────────── */
+@media (min-width: 360px) {
+  header h1 { font-size: 1.3rem; }
+  main      { padding: 1rem; gap: 1.25rem; }
+  section   { padding: 1.1rem; }
+}
+
+/* ── 480px ───────────────────────────────────────────────────── */
+@media (min-width: 480px) {
+  .stats-container { grid-template-columns: 1fr 1fr; }
+
+  .form-actions { flex-direction: row; flex-wrap: wrap; }
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary { width: auto; flex: 1; }
+
+  /* settings actions row */
+  .settings-actions { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .settings-actions .btn-primary { width: auto; }
+
+  /* export / import side-by-side */
+  .settings-data-btns { flex-direction: row; flex-wrap: wrap; }
+  .settings-data-btns .btn-secondary,
+  .settings-data-btns .import-label { width: auto; flex: 1; }
+
+  .chart-bars { height: 120px; }
+}
+
+/* ── 600px — table list view restores ───────────────────────── */
+@media (min-width: 600px) {
+  .table-wrapper { border: 1px solid var(--border); overflow-x: auto; }
+  table          { min-width: 560px; }
+
+  table, thead, tbody, th, td, tr { display: revert; }
+  thead tr { position: static; }
+
+  tbody tr {
+    display: table-row;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 0;
+    box-shadow: none;
+    grid-template-columns: unset;
+  }
+
+  td { border-bottom: 1px solid var(--border); padding: .7rem .9rem; }
+  td::before { display: none; }
+
+  td[data-label="Actions"] {
+    display: table-cell;
+    border-top: none;
+    margin-top: 0;
+    padding-top: .7rem;
+  }
+}
+
+/* ── 768px (tablet) ──────────────────────────────────────────── */
+@media (min-width: 768px) {
+  :root { --header-h: 60px; --nav-h: 50px; }
+
+  header    { padding: 0 2rem; }
+  header h1 { font-size: 1.5rem; }
+
+  /* hide hamburger — show nav as horizontal bar */
+  .nav-toggle { display: none; }
+  nav {
+    max-height: none;
+    overflow: visible;
+    padding: 0 2rem;
+  }
+  nav ul {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: .25rem;
+    padding: 0;
+    height: var(--nav-h);
+    align-items: center;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  nav ul::-webkit-scrollbar { display: none; }
+  nav a { padding: .45rem .85rem; font-size: .9rem; white-space: nowrap; }
+
+  main    { padding: 1.5rem 2rem; gap: 2rem; }
+  section { padding: 1.5rem; }
+
+  .stats-container { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+
+  /* search bar inline grid */
+  .search-bar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: .75rem;
+    row-gap: .35rem;
+    align-items: center;
+  }
+  .search-bar > label:first-of-type { grid-row: 1; grid-column: 1; white-space: nowrap; }
+  #search        { grid-row: 1; grid-column: 2; }
+  .toggle-label  { grid-row: 1; grid-column: 3; white-space: nowrap; }
+  .search-status { grid-row: 2; grid-column: 2; }
+  .result-count  { grid-row: 2; grid-column: 3; justify-self: end; }
+
+  /* form 2-col */
+  #transaction-form { grid-template-columns: 1fr 1fr; }
+  .form-actions     { grid-column: 1 / -1; flex-direction: row; }
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary { width: auto; flex: none; }
+
+  /* settings 2-col */
+  .settings-grid { grid-template-columns: 1fr 1fr; }
+  .settings-actions {
+    flex-direction: row;
+    align-items: center;
+    gap: .75rem;
+  }
+  .settings-actions .btn-primary { width: auto; }
+  .settings-data-btns { flex-direction: row; gap: .625rem; }
+  .settings-data-btns .btn-secondary,
+  .settings-data-btns .import-label { width: auto; flex: none; }
+
+  .chart-bars { height: 140px; }
+}
+
+/* ── 1024px (desktop) ────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  :root { --header-h: 64px; --nav-h: 52px; }
+
+  header    { padding: 0 3rem; }
+  header h1 { font-size: 1.65rem; }
+  nav       { padding: 0 3rem; }
+  nav ul    { gap: .375rem; }
+  main      { padding: 2rem 3rem; gap: 2.5rem; }
+  section   { padding: 1.75rem 2rem; }
+
+  #transaction-form { grid-template-columns: repeat(4, 1fr); }
+  .form-actions     { grid-column: 1 / -1; }
+
+  .settings-grid { grid-template-columns: repeat(4, 1fr); }
+
+  .chart-bars { height: 160px; }
+  .bar-amount { font-size: .65rem; }
+}
+
+/* ── 1280px (wide) ───────────────────────────────────────────── */
+@media (min-width: 1280px) {
+  main { max-width: 1280px; }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
