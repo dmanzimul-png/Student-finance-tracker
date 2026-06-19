@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tests — Student Finance Tracker</title>
+  <style>
+    body       { font-family: system-ui, sans-serif; padding: 1.5rem; background: #f1f5f9; color: #1e293b; }
+    h1         { margin-bottom: 1rem; color: #2563eb; }
+    pre        { background: #fff; padding: 1.25rem; border-radius: 10px; border: 1px solid #e2e8f0;
+                 line-height: 1.8; overflow-x: auto; font-size: .875rem; }
+    .pass      { color: #16a34a; }
+    .fail      { color: #dc2626; font-weight: 700; }
+    #summary   { margin-top: 1rem; font-size: 1.1rem; font-weight: 700; padding: .75rem 1rem;
+                 border-radius: 8px; display: inline-block; }
+    .all-pass  { background: #dcfce7; color: #16a34a; }
+    .has-fail  { background: #fee2e2; color: #dc2626; }
+  </style>
+</head>
+<body>
+<h1>Regex &amp; Validator Tests</h1>
+<pre id="output"></pre>
+<p id="summary"></p>
+
+<script type="module">
+import { regex, validate }           from './scripts/validator.js';
+import { compileRegex, highlight, escapeHtml } from './scripts/search.js';
+
+const results = [];
+
+function assert(label, got, expected) {
+  results.push({ label, pass: got === expected, got, expected });
+}
+
+// ── regex.description ────────────────────────────────────────────────────────
+assert('desc valid "Lunch at cafeteria"',     regex.description.test('Lunch at cafeteria'), true);
+assert('desc valid single word',              regex.description.test('Books'),              true);
+assert('desc invalid — leading space',        regex.description.test(' Lunch'),             false);
+assert('desc invalid — trailing space',       regex.description.test('Lunch '),             false);
+assert('desc invalid — only spaces',          regex.description.test('   '),                false);
+
+// ── regex.amount ──────────────────────────────────────────────────────────────
+assert('amount "12.50" valid',                regex.amount.test('12.50'),    true);
+assert('amount "0" valid',                    regex.amount.test('0'),        true);
+assert('amount "0.99" valid',                 regex.amount.test('0.99'),     true);
+assert('amount "100" valid (no decimals)',     regex.amount.test('100'),      true);
+assert('amount "01.5" invalid leading zero',  regex.amount.test('01.5'),     false);
+assert('amount "12.999" invalid 3 decimals',  regex.amount.test('12.999'),   false);
+assert('amount "-5" invalid',                 regex.amount.test('-5'),       false);
+assert('amount "" empty invalid',             regex.amount.test(''),         false);
+assert('amount "abc" invalid',                regex.amount.test('abc'),      false);
+
+// ── regex.date ────────────────────────────────────────────────────────────────
+assert('date "2025-09-25" valid',             regex.date.test('2025-09-25'), true);
+assert('date "2025-12-31" valid',             regex.date.test('2025-12-31'), true);
+assert('date "2025-13-01" invalid month',     regex.date.test('2025-13-01'), false);
+assert('date "2025-00-15" invalid month',     regex.date.test('2025-00-15'), false);
+assert('date "2025-9-5" missing padding',     regex.date.test('2025-9-5'),   false);
+assert('date "25-09-2025" wrong format',      regex.date.test('25-09-2025'), false);
+
+// ── regex.category ────────────────────────────────────────────────────────────
+assert('category "Food" valid',               regex.category.test('Food'),        true);
+assert('category "Eating-Out" valid',         regex.category.test('Eating-Out'),  true);
+assert('category "Fast Food" valid',          regex.category.test('Fast Food'),   true);
+assert('category "123" invalid',              regex.category.test('123'),         false);
+assert('category "Food " trailing space',     regex.category.test('Food '),       false);
+assert('category " Food" leading space',      regex.category.test(' Food'),       false);
+
+// ── Advanced: duplicate words (back-reference) ────────────────────────────────
+assert('dupWord "the the" caught',            regex.duplicateWords.test('the the'),       true);
+assert('dupWord "Coffee coffee" caught (ci)', regex.duplicateWords.test('Coffee coffee'), true);
+assert('dupWord "Coffee shop" ok',            regex.duplicateWords.test('Coffee shop'),   false);
+assert('dupWord "buy buy" caught',            regex.duplicateWords.test('buy buy'),       true);
+
+// ── validate() ────────────────────────────────────────────────────────────────
+assert('validate desc ok → null',             validate('description', 'Lunch at cafe'), null);
+assert('validate desc leading space → err',   typeof validate('description', ' Bad'),  'string');
+assert('validate desc dup word → err',        typeof validate('description', 'buy buy'), 'string');
+assert('validate amount "9.99" → null',       validate('amount', '9.99'),              null);
+assert('validate amount "abc" → err',         typeof validate('amount', 'abc'),        'string');
+assert('validate amount "0" → null',          validate('amount', '0'),                 null);
+assert('validate date ok → null',             validate('date', '2025-06-15'),          null);
+assert('validate date bad → err',             typeof validate('date', '2025-13-01'),   'string');
+assert('validate category ok → null',         validate('category', 'Transport'),       null);
+assert('validate category bad → err',         typeof validate('category', '123'),      'string');
+assert('validate unknown field → null',       validate('other', 'anything'),           null);
+
+// ── compileRegex ──────────────────────────────────────────────────────────────
+assert('compileRegex valid → RegExp',         compileRegex('coffee') instanceof RegExp, true);
+assert('compileRegex invalid → null',         compileRegex('[invalid') === null,        true);
+assert('compileRegex empty → null',           compileRegex('') === null,                true);
+assert('compileRegex null-like → null',       compileRegex(null) === null,              true);
+
+// ── escapeHtml ────────────────────────────────────────────────────────────────
+assert('escapeHtml &',   escapeHtml('a & b'),    'a &amp; b');
+assert('escapeHtml <',   escapeHtml('<script>'),  '&lt;script&gt;');
+assert('escapeHtml "',   escapeHtml('say "hi"'),  'say &quot;hi&quot;');
+assert('escapeHtml safe', escapeHtml('Hello'),    'Hello');
+
+// ── highlight (global — all matches) ─────────────────────────────────────────
+assert('highlight single match',
+  highlight('coffee break', /coffee/i),
+  '<mark>coffee</mark> break');
+
+assert('highlight multiple matches',
+  highlight('coffee and coffee', /coffee/i),
+  '<mark>coffee</mark> and <mark>coffee</mark>');
+
+assert('highlight no match',
+  highlight('tea', /coffee/i),
+  'tea');
+
+assert('highlight escapes HTML in unmatched text',
+  highlight('<b>tea</b>', /tea/i),
+  '&lt;b&gt;<mark>tea</mark>&lt;/b&gt;');
+
+assert('highlight null regex returns escaped text',
+  highlight('<script>', null),
+  '&lt;script&gt;');
+
+// ── Finance-specific search patterns ─────────────────────────────────────────
+assert('cents pattern /\\.\\d{2}\\b/ matches "12.50"', /\.\d{2}\b/.test('12.50'),         true);
+assert('cents pattern does not match "12"',             /\.\d{2}\b/.test('12'),            false);
+assert('beverage /(coffee|tea)/i matches "Coffee"',     /(coffee|tea)/i.test('Coffee'),   true);
+assert('beverage matches "Green tea"',                  /(coffee|tea)/i.test('Green tea'), true);
+assert('beverage does not match "water"',               /(coffee|tea)/i.test('water'),    false);
+
+// ── Render results ────────────────────────────────────────────────────────────
+const out     = document.getElementById('output');
+const summary = document.getElementById('summary');
+let passed    = 0;
+
+out.innerHTML = results.map(r => {
+  if (r.pass) { passed++; return `<span class="pass">✓ ${r.label}</span>`; }
+  return `<span class="fail">✗ ${r.label}\n    got:      ${JSON.stringify(r.got)}\n    expected: ${JSON.stringify(r.expected)}</span>`;
+}).join('\n');
+
+const total = results.length;
+summary.textContent   = `${passed} / ${total} tests passed`;
+summary.className     = passed === total ? 'all-pass' : 'has-fail';
+</script>
+</body>
+</html>
